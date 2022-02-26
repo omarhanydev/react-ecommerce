@@ -12,6 +12,32 @@ const config = {
     measurementId: "G-E36GGJZNNC"
 };
 
+export const createUserProfileDocument = async (userAuth, addtionalData) => {
+    if (!userAuth) return;
+
+    const userRef = firestore.doc(`users/${userAuth.uid}`);
+
+    const snapShot = await userRef.get();
+
+    if (!snapShot.exists) {
+        const { displayName, email } = userAuth;
+        const createdAt = new Date();
+
+        try {
+            await userRef.set({
+                displayName,
+                email,
+                createdAt,
+                ...addtionalData
+            });
+        } catch (err) {
+            console.log('error creating user', err.message);
+        }
+    }
+
+    return userRef;
+};
+
 firebase.initializeApp(config);
 
 export const auth = firebase.auth();
@@ -23,5 +49,9 @@ provider.setCustomParameters({
 });
 
 export const signInWithGoogle = () => auth.signInWithPopup(provider);
+
+// console.log(firestore.collection('users').doc('OpOrOUlfRORCzExhIPkx').collection('cartItems').doc('0vanTp7uuWathhCCDYTF'));
+// console.log(firestore.doc('/users/OpOrOUlfRORCzExhIPkx/cartItems/0vanTp7uuWathhCCDYTF'));
+// console.log(firestore.collection('/users/OpOrOUlfRORCzExhIPkx/cartItems'));
 
 export default firebase;
